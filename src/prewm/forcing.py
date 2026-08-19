@@ -60,6 +60,23 @@ def single_step_schedule(t: int, token: int):
     return lambda step: int(token) if step == t else None
 
 
+def isolate_schedule(base_frames, t: int, token: int, window: int, eos: int):
+    """Isolate the channel response to a single frame: teacher-force the ENTIRE sequence to
+    `base_frames` EXCEPT frame t (forced to `token`), out to t+window, then eos. Because only
+    frame t differs across candidates, the re-encoded detector latent near t reflects the
+    forced token alone (variance reduction beyond CRN, spec §5.4). Read psi at t + offset."""
+    n = len(base_frames)
+    stop = min(t + window, n)
+
+    def sched(step):
+        if step == t:
+            return int(token)
+        if step < stop:
+            return int(base_frames[step])
+        return int(eos)
+    return sched
+
+
 def branch_schedule(prefix_tokens, t: int, token: int, margin: int, eos: int):
     """Branch rollout schedule: teacher-force prefix[:t], force `token` at t, free for `margin`
     frames (to give the encoder right-context at frame t), then force eos to TERMINATE. Bounds

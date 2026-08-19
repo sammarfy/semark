@@ -29,12 +29,13 @@ from src.prewm.candidates import select_candidates  # noqa: E402
 from src.prewm.stochasticity import collision  # noqa: E402
 from src.prewm.talker_map import TalkerCodecMap  # noqa: E402
 from src.prewm.branch import BranchFrame, aggregate_frames  # noqa: E402
-from src.prewm.forcing import CodecHeadForcer, branch_schedule  # noqa: E402
+from src.prewm.forcing import CodecHeadForcer, isolate_schedule  # noqa: E402
 
 EOS = 2150
+OFFSET = 1   # talker emitted frame t -> re-encoded detector frame t+1 (measured, run_branch_align)
 
 
-def pilot(adapter, n_anchors=8, k_max=6, n_cont=2, n_keys=64, b_context=10, margin=6,
+def pilot(adapter, n_anchors=8, k_max=6, n_cont=2, n_keys=64, b_context=10, margin=14,
           texts=None, out="artifacts/e0d/branch_rollouts"):
     import torch
     os.makedirs(out, exist_ok=True)
@@ -144,19 +145,19 @@ def pilot(adapter, n_anchors=8, k_max=6, n_cont=2, n_keys=64, b_context=10, marg
             for ci, v in enumerate(cand):
                 acc = []
                 for s in range(n_cont):
-                    wav, _ = gen_forced(branch_schedule(base_frames, t, int(v), margin, EOS),
+                    wav, _ = gen_forced(isolate_schedule(base_frames, t, int(v), margin, EOS),
                                         seed=90000 + t * 100 + s)
                     zt = z_tilde(wav)
-                    if t < len(zt):
-                        acc.append(zt[t] @ U.T)
+                    if t + OFFSET < len(zt):
+                        acc.append(zt[t + OFFSET] @ U.T)
                 if acc:
                     psi[ci] = np.mean(acc, axis=0)
             # natural-reproduction guard: forcing base[t] should ~reproduce the base frame-t latent
-            wav_nat, _ = gen_forced(branch_schedule(base_frames, t, int(base_frames[t]), margin, EOS),
+            wav_nat, _ = gen_forced(isolate_schedule(base_frames, t, int(base_frames[t]), margin, EOS),
                                     seed=90000 + t * 100)
             zt_nat = z_tilde(wav_nat)
-            if t < len(zt_nat):
-                natural_dev.append(float(np.linalg.norm(zt_nat[t] - base_z[t])))
+            if t + OFFSET < len(zt_nat) and t + OFFSET < len(base_z):
+                natural_dev.append(float(np.linalg.norm(zt_nat[t + OFFSET] - base_z[t + OFFSET])))
 
             phi = codec_feat[cand]
             for k in range(n_keys):
