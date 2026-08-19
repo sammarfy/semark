@@ -188,7 +188,7 @@ def pilot(adapter, n_anchors=8, k_max=6, n_cont=2, n_keys=64, b_context=10, marg
                "C_raw_mean": float(np.mean([a.C_raw for a in aggs])),
                "sigma_matched_within": sigma_within, "psi_has_variance": psi_has_variance,
                "cauchy_schwarz_ok": cs_ok, "natural_repro_latent_dev_median": float(np.median(natural_dev)) if natural_dev else None,
-               "natural_repro_ok": bool(natural_ok), "estimator": "within-frame mean_t(cov); NOT pooled",
+               "natural_repro_ok": bool(natural_ok), "natural_repro_note": "confounded by acoustic-seed diff vs base (~codec noise floor ~15 L2/frame); NOT a gate", "estimator": "within-frame mean_t(cov); NOT pooled",
                "gate": "IDENTIFIED" if identified else "NOT_IDENTIFIED",
                "reason": None if identified else "psi ~zero variance (forcing ineffective) or CS violated"}
     json.dump(metrics, open(os.path.join(out, "..", "branch_pilot_metrics.json"), "w"), indent=2)
