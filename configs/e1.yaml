@@ -1,0 +1,40 @@
+# E1 provenance/channel probe (spec §7-§9). Gated: runs only after E0-e passes and E0 detector
+# gates hold. NO watermarking. 100 texts x 8 seeds x 1 voice = 800 unwatermarked realizations.
+experiment_name: "e1"
+model:
+  id: "Qwen/Qwen3-TTS-12Hz-0.6B-Base"
+  tokenizer_id: "Qwen/Qwen3-TTS-Tokenizer-12Hz"
+  dtype: "bfloat16"
+tokenizer_facts: {semantic_dim: 256, frame_rate_hz: 12.5, sample_rate_hz: 24000, hop: 1920}
+
+design:
+  prompts_file: "configs/e1_prompts.json"
+  seeds: [101, 202, 303, 404, 505, 606, 707, 808]     # 8 seeds
+  voice_id: "repo_default"
+  n_texts: 100
+  splits: {fit: 60, dev: 20, test: 20, seed: 20260819}
+  # Stage-1 prompt length rule (spec §7.1): T >= 2*b_context + 40 frames, from E0-e.
+  min_interior_rule: "T >= 2*b_context + 40"
+
+transform: {ridge: 1.0e-3}
+
+channels:
+  synchronous: ["clean", "resample_16k", "resample_8k", "awgn_30", "awgn_20", "awgn_10", "lowpass", "highpass"]
+  # codec families need ffmpeg on host; timing families are diagnostic-only (not in the fit)
+  codec_host: ["mp3_128", "mp3_64", "opus_64", "opus_32"]
+  timing_diagnostic: ["speed_105", "speed_095", "crop"]
+
+spectrum:
+  eps_grid: [1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1]   # >= one decade
+  ranks: [4, 8, 16, 32]
+  bootstrap_replicates: 200                             # bootstrap TEXTS, not frames
+  shrinkage: true
+
+reperformance:
+  # E1 uses same text / same checkpoint / same voice / different seed (spec §7.2).
+  # E1 diagnostic alignment = naive index on common prefix (flagged). MFA phone-occurrence
+  # alignment is required for E1.5 Stage-1; STOP if duration spread makes naive alignment invalid.
+  max_duration_spread_frames: 24
+  alignment: "naive_prefix_e1_diagnostic"
+
+paths: {artifacts_root: "artifacts/e1"}

@@ -1,0 +1,9 @@
+repeat_identical,sample_id,seam_contamination_frames
+True,p0_repo_default_s101_16ef67cbcfec,18
+True,p0_repo_default_s202_0292cd8ec9d9,16
+True,p0_repo_default_s303_1f2fe94b1a6a,7
+True,p0_repo_default_s404_fc8826df4f7b,18
+True,p1_repo_default_s101_fbbf3aa8c6e1,25
+True,p1_repo_default_s202_ad3d6206b189,8
+True,p1_repo_default_s303_f3e3e5960de1,29
+True,p1_repo_default_s404_ee537186a5a1,22

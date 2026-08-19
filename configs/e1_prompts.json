@@ -1,0 +1,405 @@
+{
+ "description": "E1 Stage-1 corpus: 100 frozen English read-speech sentences (deterministic, declarative, varied length/phonetics). Swap for a curated corpus later if desired.",
+ "prompts": [
+  {
+   "id": "e1_000",
+   "text": "The traveler described the wooden crates before the storm arrived."
+  },
+  {
+   "id": "e1_001",
+   "text": "The traveler remembered a stack of letters near the edge of town."
+  },
+  {
+   "id": "e1_002",
+   "text": "The traveler questioned the harbor lights under the flickering lamp."
+  },
+  {
+   "id": "e1_003",
+   "text": "The traveler arranged several old maps beside the frozen river."
+  },
+  {
+   "id": "e1_004",
+   "text": "The traveler measured the broken clock as the church bells rang."
+  },
+  {
+   "id": "e1_005",
+   "text": "The traveler repaired a basket of apples before the storm arrived."
+  },
+  {
+   "id": "e1_006",
+   "text": "The traveler delivered the narrow staircase near the edge of town."
+  },
+  {
+   "id": "e1_007",
+   "text": "A quiet student remembered several old maps while the kettle boiled."
+  },
+  {
+   "id": "e1_008",
+   "text": "A quiet student questioned the broken clock after the long meeting."
+  },
+  {
+   "id": "e1_009",
+   "text": "A quiet student arranged a basket of apples during the quiet afternoon."
+  },
+  {
+   "id": "e1_010",
+   "text": "A quiet student measured the narrow staircase without a single complaint."
+  },
+  {
+   "id": "e1_011",
+   "text": "A quiet student repaired two silver coins just past the market square."
+  },
+  {
+   "id": "e1_012",
+   "text": "A quiet student delivered the garden fence while the kettle boiled."
+  },
+  {
+   "id": "e1_013",
+   "text": "A quiet student photographed a bundle of reeds after the long meeting."
+  },
+  {
+   "id": "e1_014",
+   "text": "The old sailor questioned the narrow staircase near the edge of town."
+  },
+  {
+   "id": "e1_015",
+   "text": "The old sailor arranged two silver coins under the flickering lamp."
+  },
+  {
+   "id": "e1_016",
+   "text": "The old sailor measured the garden fence beside the frozen river."
+  },
+  {
+   "id": "e1_017",
+   "text": "The old sailor repaired a bundle of reeds as the church bells rang."
+  },
+  {
+   "id": "e1_018",
+   "text": "The old sailor delivered the painted door before the storm arrived."
+  },
+  {
+   "id": "e1_019",
+   "text": "The old sailor photographed several glass jars near the edge of town."
+  },
+  {
+   "id": "e1_020",
+   "text": "The old sailor collected the tangled ropes under the flickering lamp."
+  },
+  {
+   "id": "e1_021",
+   "text": "Her younger brother arranged a bundle of reeds after the long meeting."
+  },
+  {
+   "id": "e1_022",
+   "text": "Her younger brother measured the painted door during the quiet afternoon."
+  },
+  {
+   "id": "e1_023",
+   "text": "Her younger brother repaired several glass jars without a single complaint."
+  },
+  {
+   "id": "e1_024",
+   "text": "Her younger brother delivered the tangled ropes just past the market square."
+  },
+  {
+   "id": "e1_025",
+   "text": "Her younger brother photographed a row of candles while the kettle boiled."
+  },
+  {
+   "id": "e1_026",
+   "text": "Her younger brother collected the dusty ledgers after the long meeting."
+  },
+  {
+   "id": "e1_027",
+   "text": "Her younger brother explained the wooden crates during the quiet afternoon."
+  },
+  {
+   "id": "e1_028",
+   "text": "The city council measured the tangled ropes under the flickering lamp."
+  },
+  {
+   "id": "e1_029",
+   "text": "The city council repaired a row of candles beside the frozen river."
+  },
+  {
+   "id": "e1_030",
+   "text": "The city council delivered the dusty ledgers as the church bells rang."
+  },
+  {
+   "id": "e1_031",
+   "text": "The city council photographed the wooden crates before the storm arrived."
+  },
+  {
+   "id": "e1_032",
+   "text": "The city council collected a stack of letters near the edge of town."
+  },
+  {
+   "id": "e1_033",
+   "text": "The city council explained the harbor lights under the flickering lamp."
+  },
+  {
+   "id": "e1_034",
+   "text": "The city council recorded several old maps beside the frozen river."
+  },
+  {
+   "id": "e1_035",
+   "text": "A curious child repaired the wooden crates during the quiet afternoon."
+  },
+  {
+   "id": "e1_036",
+   "text": "A curious child delivered a stack of letters without a single complaint."
+  },
+  {
+   "id": "e1_037",
+   "text": "A curious child photographed the harbor lights just past the market square."
+  },
+  {
+   "id": "e1_038",
+   "text": "A curious child collected several old maps while the kettle boiled."
+  },
+  {
+   "id": "e1_039",
+   "text": "A curious child explained the broken clock after the long meeting."
+  },
+  {
+   "id": "e1_040",
+   "text": "A curious child recorded a basket of apples during the quiet afternoon."
+  },
+  {
+   "id": "e1_041",
+   "text": "A curious child inspected the narrow staircase without a single complaint."
+  },
+  {
+   "id": "e1_042",
+   "text": "The morning nurse delivered several old maps beside the frozen river."
+  },
+  {
+   "id": "e1_043",
+   "text": "The morning nurse photographed the broken clock as the church bells rang."
+  },
+  {
+   "id": "e1_044",
+   "text": "The morning nurse collected a basket of apples before the storm arrived."
+  },
+  {
+   "id": "e1_045",
+   "text": "The morning nurse explained the narrow staircase near the edge of town."
+  },
+  {
+   "id": "e1_046",
+   "text": "The morning nurse recorded two silver coins under the flickering lamp."
+  },
+  {
+   "id": "e1_047",
+   "text": "The morning nurse inspected the garden fence beside the frozen river."
+  },
+  {
+   "id": "e1_048",
+   "text": "The morning nurse folded a bundle of reeds as the church bells rang."
+  },
+  {
+   "id": "e1_049",
+   "text": "An honest merchant photographed the narrow staircase without a single complaint."
+  },
+  {
+   "id": "e1_050",
+   "text": "An honest merchant collected two silver coins just past the market square."
+  },
+  {
+   "id": "e1_051",
+   "text": "An honest merchant explained the garden fence while the kettle boiled."
+  },
+  {
+   "id": "e1_052",
+   "text": "An honest merchant recorded a bundle of reeds after the long meeting."
+  },
+  {
+   "id": "e1_053",
+   "text": "An honest merchant inspected the painted door during the quiet afternoon."
+  },
+  {
+   "id": "e1_054",
+   "text": "An honest merchant folded several glass jars without a single complaint."
+  },
+  {
+   "id": "e1_055",
+   "text": "An honest merchant planted the tangled ropes just past the market square."
+  },
+  {
+   "id": "e1_056",
+   "text": "The retired teacher collected a bundle of reeds as the church bells rang."
+  },
+  {
+   "id": "e1_057",
+   "text": "The retired teacher explained the painted door before the storm arrived."
+  },
+  {
+   "id": "e1_058",
+   "text": "The retired teacher recorded several glass jars near the edge of town."
+  },
+  {
+   "id": "e1_059",
+   "text": "The retired teacher inspected the tangled ropes under the flickering lamp."
+  },
+  {
+   "id": "e1_060",
+   "text": "The retired teacher folded a row of candles beside the frozen river."
+  },
+  {
+   "id": "e1_061",
+   "text": "The retired teacher planted the dusty ledgers as the church bells rang."
+  },
+  {
+   "id": "e1_062",
+   "text": "The retired teacher counted the wooden crates before the storm arrived."
+  },
+  {
+   "id": "e1_063",
+   "text": "The village baker explained the tangled ropes just past the market square."
+  },
+  {
+   "id": "e1_064",
+   "text": "The village baker recorded a row of candles while the kettle boiled."
+  },
+  {
+   "id": "e1_065",
+   "text": "The village baker inspected the dusty ledgers after the long meeting."
+  },
+  {
+   "id": "e1_066",
+   "text": "The village baker folded the wooden crates during the quiet afternoon."
+  },
+  {
+   "id": "e1_067",
+   "text": "The village baker planted a stack of letters without a single complaint."
+  },
+  {
+   "id": "e1_068",
+   "text": "The village baker counted the harbor lights just past the market square."
+  },
+  {
+   "id": "e1_069",
+   "text": "The village baker described several old maps while the kettle boiled."
+  },
+  {
+   "id": "e1_070",
+   "text": "A weary farmer recorded the wooden crates before the storm arrived."
+  },
+  {
+   "id": "e1_071",
+   "text": "A weary farmer inspected a stack of letters near the edge of town."
+  },
+  {
+   "id": "e1_072",
+   "text": "A weary farmer folded the harbor lights under the flickering lamp."
+  },
+  {
+   "id": "e1_073",
+   "text": "A weary farmer planted several old maps beside the frozen river."
+  },
+  {
+   "id": "e1_074",
+   "text": "A weary farmer counted the broken clock as the church bells rang."
+  },
+  {
+   "id": "e1_075",
+   "text": "A weary farmer described a basket of apples before the storm arrived."
+  },
+  {
+   "id": "e1_076",
+   "text": "A weary farmer remembered the narrow staircase near the edge of town."
+  },
+  {
+   "id": "e1_077",
+   "text": "The visiting scholar inspected several old maps while the kettle boiled."
+  },
+  {
+   "id": "e1_078",
+   "text": "The visiting scholar folded the broken clock after the long meeting."
+  },
+  {
+   "id": "e1_079",
+   "text": "The visiting scholar planted a basket of apples during the quiet afternoon."
+  },
+  {
+   "id": "e1_080",
+   "text": "The visiting scholar counted the narrow staircase without a single complaint."
+  },
+  {
+   "id": "e1_081",
+   "text": "The visiting scholar described two silver coins just past the market square."
+  },
+  {
+   "id": "e1_082",
+   "text": "The visiting scholar remembered the garden fence while the kettle boiled."
+  },
+  {
+   "id": "e1_083",
+   "text": "The visiting scholar questioned a bundle of reeds after the long meeting."
+  },
+  {
+   "id": "e1_084",
+   "text": "Our new neighbor folded the narrow staircase near the edge of town."
+  },
+  {
+   "id": "e1_085",
+   "text": "Our new neighbor planted two silver coins under the flickering lamp."
+  },
+  {
+   "id": "e1_086",
+   "text": "Our new neighbor counted the garden fence beside the frozen river."
+  },
+  {
+   "id": "e1_087",
+   "text": "Our new neighbor described a bundle of reeds as the church bells rang."
+  },
+  {
+   "id": "e1_088",
+   "text": "Our new neighbor remembered the painted door before the storm arrived."
+  },
+  {
+   "id": "e1_089",
+   "text": "Our new neighbor questioned several glass jars near the edge of town."
+  },
+  {
+   "id": "e1_090",
+   "text": "Our new neighbor arranged the tangled ropes under the flickering lamp."
+  },
+  {
+   "id": "e1_091",
+   "text": "The night watchman planted a bundle of reeds after the long meeting."
+  },
+  {
+   "id": "e1_092",
+   "text": "The night watchman counted the painted door during the quiet afternoon."
+  },
+  {
+   "id": "e1_093",
+   "text": "The night watchman described several glass jars without a single complaint."
+  },
+  {
+   "id": "e1_094",
+   "text": "The night watchman remembered the tangled ropes just past the market square."
+  },
+  {
+   "id": "e1_095",
+   "text": "The night watchman questioned a row of candles while the kettle boiled."
+  },
+  {
+   "id": "e1_096",
+   "text": "The night watchman arranged the dusty ledgers after the long meeting."
+  },
+  {
+   "id": "e1_097",
+   "text": "The night watchman measured the wooden crates during the quiet afternoon."
+  },
+  {
+   "id": "e1_098",
+   "text": "A patient gardener counted the tangled ropes under the flickering lamp."
+  },
+  {
+   "id": "e1_099",
+   "text": "A patient gardener described a row of candles beside the frozen river."
+  }
+ ]
+}

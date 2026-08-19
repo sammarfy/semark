@@ -1,0 +1,41 @@
+{
+  "D_local": {
+    "mean": 0.22595876995987146,
+    "median": 0.14062046870755096,
+    "n": 1504,
+    "p10": 0.0016953077075843816,
+    "p90": 0.5614873476554362
+  },
+  "D_local_bootstrap_texts": {
+    "ci_high": 0.24097880014625475,
+    "ci_low": 0.21403292904258162,
+    "mean": 0.2261792778646939,
+    "n_replicates": 500,
+    "point": 0.22592409502993754
+  },
+  "boundary_caveat": "interior-frame mask pending E0-e; all frames used here",
+  "cascade_share_est": 0.7393785813611633,
+  "n_frames_total": 1504,
+  "n_keys": 64,
+  "n_texts": 8,
+  "sigma_matched": 1.5967358400568095,
+  "sigma_matched_sq_bootstrap_texts": {
+    "ci_high": 2.700352894362086,
+    "ci_low": 2.4259394053600585,
+    "mean": 2.5429717684689357,
+    "n_replicates": 500,
+    "point": 2.549565342921925
+  },
+  "sigma_operational": "DEFERRED",
+  "temperature": 0.9,
+  "trajectory_seed_disagreement_ref": 0.867,
+  "whitening": {
+    "center_sha256": "deda6b0c7daedf2a98101ed2f47f94ae618f45f0b5f1462a59c08e04c5550d0d",
+    "codebook_cov_condition_number": 339.3591634440419,
+    "dim": 256,
+    "n_centroids": 2048,
+    "ridge": 0.001,
+    "source": "frozen_semantic_codebook",
+    "whitening_sha256": "6f607ed5e09217a7ec894fad227b426f0986dd5281c85f1f178e266b3fdeb5f7"
+  }
+}

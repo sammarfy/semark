@@ -1,0 +1,18 @@
+# raw artifacts are large and reproducible; keep them out of version control
+artifacts/e0/samples/
+artifacts/**/*.pt
+artifacts/**/*.wav
+artifacts/**/*.npy
+# but DO keep metrics summaries, figures, and the report (remove the ignores below
+# if you prefer to also version them):
+!artifacts/e0/metrics/
+!artifacts/e0/figures/
+!artifacts/e0/E0_REPORT.md
+
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.DS_Store
+run_e0_colab_selfcontained.ipynb
+run_e0_colab.ipynb

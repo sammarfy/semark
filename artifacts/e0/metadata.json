@@ -1,0 +1,70 @@
+{
+  "config_hash": "901b5af0821df247ba3ce349280cb2c3c21bc072d607319731d73cc605d4d76a",
+  "cuda_version": "12.8",
+  "device": "cuda:0",
+  "discovered_structure": {
+    "NOTE_D4": "talker semantic head is 3072-wide but codec codebook is 2048; p_t is over the talker vocab.",
+    "codebook_shape": [
+      2048,
+      256
+    ],
+    "input_proj_present": true,
+    "notes": [
+      "path: model.encoder.quantizer.semantic_residual_vector_quantizer",
+      "input_proj present: True",
+      "quantize via srvq.encode(pre_proj_latent); latents via input_proj forward hook"
+    ],
+    "quantizer_path": "model.encoder.quantizer.semantic_residual_vector_quantizer",
+    "sampling": {
+      "do_sample": true,
+      "repetition_penalty": 1.05,
+      "temperature": 0.9,
+      "top_k": 50,
+      "top_p": 1.0
+    },
+    "semantic_codec_vocab": 2048,
+    "semantic_dim": 256,
+    "talker_codec_head_out": 3072
+  },
+  "dtype": "bfloat16",
+  "experiment_name": "e0",
+  "frame_rate_hz": 12.5,
+  "git_dirty": null,
+  "git_sha": null,
+  "gpu": "Tesla T4",
+  "prompts_file_sha256": "96bbceb8213b872656bf28d3cf226f9dba5b92cdb4fd5d517e35fbafdba01e49",
+  "sample_rate_hz": 24000,
+  "sampling_config_actual": {
+    "do_sample": true,
+    "repetition_penalty": 1.05,
+    "temperature": 0.9,
+    "top_k": 50,
+    "top_p": 1.0
+  },
+  "seeds": [
+    101,
+    202,
+    303,
+    404
+  ],
+  "semantic_dim": 256,
+  "semantic_vocab_size": 2048,
+  "talker_vocab_size": 3072,
+  "tokenizer_facts_config": {
+    "frame_rate_hz": 12.5,
+    "hop": 1920,
+    "num_semantic_quantizers": 1,
+    "sample_rate_hz": 24000,
+    "semantic_codec_vocab": 2048,
+    "semantic_dim": 256,
+    "talker_semantic_head": 3072
+  },
+  "torch_version": "2.11.0+cu128",
+  "transformers_version": "4.57.3",
+  "voice_id": "repo_default",
+  "voice_ref_duration_s": null,
+  "voice_ref_sha256": "480f55f41c71c3d79c2a9acc48f0bfb3c5a46222e6e9ebf3e2888e93501a6b5c",
+  "warnings": [
+    "talker semantic head is 3072-wide but codec codebook is 2048; p_t is over the talker vocab."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "codec_vocab": 2048,
+  "talker_vocab": 3072,
+  "num_code_groups": 16,
+  "specials": {
+    "eos": 2150,
+    "pad": 2150,
+    "bos": null
+  },
+  "n_sampled": 180,
+  "n_ordinary": 180,
+  "n_special": 0,
+  "max_ordinary_sampled": 2026,
+  "distinct_ordinary": 122,
+  "unexplained_specials": [],
+  "gate": "PASS",
+  "rule": "talker.forward: codec_ids = cat(input_ids, code_predictor.sequences); input_ids is codec_ids[...,0] -> identity for v < codec_vocab; v >= codec_vocab special"
+}

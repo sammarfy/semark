@@ -1,0 +1,9 @@
+{
+  "center_sha256": "deda6b0c7daedf2a98101ed2f47f94ae618f45f0b5f1462a59c08e04c5550d0d",
+  "codebook_cov_condition_number": 339.35916344403347,
+  "dim": 256,
+  "n_centroids": 2048,
+  "ridge": 0.001,
+  "source": "frozen_semantic_codebook",
+  "whitening_sha256": "00c907e5a5c40307ada0427304979864edf15d55166ff6df46f7e26d95f4c716"
+}

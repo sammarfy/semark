@@ -1,0 +1,36 @@
+{
+  "prompts": [
+    {
+      "id": "p0",
+      "text": "The morning train arrived exactly on time."
+    },
+    {
+      "id": "p1",
+      "text": "She carefully placed the old photographs back into the wooden box."
+    },
+    {
+      "id": "p2",
+      "text": "Rain fell steadily across the quiet valley throughout the afternoon."
+    },
+    {
+      "id": "p3",
+      "text": "He counted the coins twice before handing them to the shopkeeper."
+    },
+    {
+      "id": "p4",
+      "text": "A gentle breeze carried the scent of pine through the open window."
+    },
+    {
+      "id": "p5",
+      "text": "The committee agreed to postpone the decision until the following week."
+    },
+    {
+      "id": "p6",
+      "text": "Bright yellow flowers lined the narrow path leading up to the small cottage."
+    },
+    {
+      "id": "p7",
+      "text": "After dinner they walked along the shore and talked quietly about the future."
+    }
+  ]
+}

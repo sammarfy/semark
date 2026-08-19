@@ -1,0 +1,18 @@
+{
+  "H_final_mean": 0.4440298373917641,
+  "H_raw_mean": 0.44420139992853175,
+  "R_trace_crude_upper_bound": 1.7399898984557394,
+  "binding_constraint": "neither/healthy",
+  "coordinate_agreement_decision": "PASS",
+  "coordinate_agreement_overall": 1.0,
+  "encoder_repeat_deterministic": true,
+  "gate_decision": "PASS",
+  "n_failed": 0,
+  "n_ok": 32,
+  "offsets_all_verified": true,
+  "recommendation": "Proceed to E1 (with explicit approval).",
+  "roundtrip_token_match_overall": 0.9590824731251875,
+  "seam_contamination_frames_max": 29,
+  "seed_token_disagreement_mean": 0.8671516695577162,
+  "weak_stochasticity": false
+}

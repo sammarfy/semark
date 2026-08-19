@@ -1,0 +1,72 @@
+# E0 smoke-test configuration (frozen).
+# Source of truth: Notion "08 — Draft Paper: SEMark", precedence per implementation prompt.
+# Scope: adapter + unit tests + 32-utterance E0 ONLY. No watermark, no RTD fit, no E1+.
+
+experiment_name: "e0"
+
+model:
+  # Confirmed real on Hugging Face (released 2026-01-22).
+  id: "Qwen/Qwen3-TTS-12Hz-0.6B-Base"
+  revision: null            # pin at runtime; recorded into metadata.json
+  tokenizer_id: "Qwen/Qwen3-TTS-Tokenizer-12Hz"
+  tokenizer_revision: null
+  # bfloat16 per the official example: fp16 overflow in the talker -> inf/nan logits ->
+  # torch.multinomial device-side assert during sampling. T4 supports bf16.
+  dtype: "bfloat16"
+
+# Confirmed at runtime (see E0_REPORT.md "Discrepancies"). Adapter READS the codebook
+# and head sizes from the model; the values here are documentation, not the source of truth.
+tokenizer_facts:
+  semantic_codec_vocab: 2048      # D1: codec semantic codebook (read at runtime), NOT 4096
+  semantic_dim: 256               # D3: post input_proj (pre-proj is 512)
+  talker_semantic_head: 3072      # D4: talker.codec_head out; p_t is over this vocab
+  num_semantic_quantizers: 1
+  frame_rate_hz: 12.5
+  sample_rate_hz: 24000
+  hop: 1920
+
+# Generation recipe. null => use the model's own generation_config default, and RECORD
+# the actual value into metadata. Do NOT change the headline recipe to make E0 pass (§22).
+sampling:
+  temperature: null
+  top_k: null
+  top_p: null
+  repetition_penalty: null
+  do_sample: true
+
+# §21.F ablation recipe (diagnostic only; NOT the headline generator).
+ablation_sampling:
+  temperature_mult: 1.5
+  top_k_mult: 4          # or disable top_k entirely
+  enabled_only_if_weak: true
+
+design:
+  prompts_file: "configs/e0_prompts.json"
+  seeds: [101, 202, 303, 404]
+  voice_id: "repo_default"     # use repository's own default reference clip (§8.1). NOT chosen by ear.
+  n_texts: 8
+  n_seeds: 4
+  n_samples: 32
+
+# §6.1: W and c_bar come from the FROZEN semantic codebook (public object), not any data split.
+transform:
+  ridge: 1.0e-3          # fixed ridge for codebook-covariance whitening
+  source: "frozen_semantic_codebook"
+
+# §9.5 encoder determinism / seam probe
+encoder_probe:
+  n_waveforms: 8
+  split_fraction: 0.5
+
+# §13 diagnostic direction bank for V_t (public, fixed seed; NOT a watermark key)
+vt_directions:
+  n_directions: 64
+  seed: 20260819
+
+# §11 graded acceptance thresholds (fp32, valid frames)
+acceptance:
+  pass_min: 0.999
+  investigate_min: 0.95
+
+paths:
+  artifacts_root: "artifacts/e0"

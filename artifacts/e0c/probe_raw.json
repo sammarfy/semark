@@ -1,0 +1,29 @@
+{
+  "talker_head_argmax_first24": [
+    558,
+    1841,
+    100,
+    2,
+    2,
+    2,
+    397,
+    1071,
+    1794,
+    744,
+    374,
+    837,
+    1968,
+    1691,
+    525,
+    1437,
+    1328,
+    804,
+    288,
+    1538,
+    1538,
+    481,
+    481,
+    1615
+  ],
+  "note": "discovery only; map.json is written after the flow is confirmed"
+}
