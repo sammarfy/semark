@@ -23,9 +23,9 @@ Colab gate** (E0-c → E0-d2 → branch C/J → E0-e → E1 → E1.5). No waterm
 
 \* PASS is source-proven; the on-hardware confirmation artifact (`map.json`, sampled-token
 verification) is written by `run_e0c_finalize.finalize(adapter)` on the GPU host.
-| Q8 | Branch rollouts identify C_raw | PENDING (needs GPU branch intervention) | `branch.py` framework + tests | GATE |
-| Q9 | J_clean (matched) | NOT IDENTIFIED yet | requires Q8 | GATE |
-| Q10 | 29-frame seam = startup context? | PENDING | `run_e0e_boundary.py` (Colab) | GATE |
+| Q8 | Branch rollouts identify C_raw | **YES** — codec_head forcing + isolate-frame + t+1 offset | `E0D_BRANCH_REPORT.md`; psi_has_variance, |J_t|<=1 hold | DONE |
+| Q9 | J_clean (matched) | **~0.45** (median 0.51, p10-p90 0.16-0.69) | C_raw 0.134, V 0.555, sigma 0.379 (8-anchor pilot) | DONE |
+| Q10 | 29-frame seam = startup context? | **NO** — b_context ~10 frames (seam was chunk artifact) | `e0_boundary/E0_BOUNDARY_REPORT.md` | DONE |
 | Q11 | Derivative eigen-tail vs re-performance | PENDING | E1 (Colab, 800 gen) | GATE |
 | Q12 | Stable low-rank RTD subspace | PENDING | E1 / E1.5 | GATE |
 | Q13 | High-RTD preserves recoverable evidence | PENDING | E1.5 branch-J(α) | GATE |

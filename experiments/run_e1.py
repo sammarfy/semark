@@ -38,7 +38,7 @@ def _write_wav_tmp(wav, sr):
     return t.name
 
 
-def run(adapter, config="configs/e1.yaml", max_texts=None):
+def run(adapter, config="configs/e1.yaml", max_texts=None, n_seeds=None, families=None, progress=10):
     cfg = yaml.safe_load(open(config))
     art = cfg["paths"]["artifacts_root"]
     os.makedirs(os.path.join(art, "spectra"), exist_ok=True)
@@ -53,7 +53,7 @@ def run(adapter, config="configs/e1.yaml", max_texts=None):
     prompts = io.read_json(cfg["design"]["prompts_file"])["prompts"]
     if max_texts:
         prompts = prompts[:max_texts]
-    seeds = cfg["design"]["seeds"]
+    seeds = cfg["design"]["seeds"][:n_seeds] if n_seeds else cfg["design"]["seeds"]
     sd = cfg["design"]["splits"]
     splits = text_splits([p["id"] for p in prompts], sd["fit"] if not max_texts else max(2, max_texts // 2),
                          sd["dev"] if not max_texts else 1, sd["test"] if not max_texts else 1, sd["seed"])
@@ -61,7 +61,7 @@ def run(adapter, config="configs/e1.yaml", max_texts=None):
 
     codebook = adapter.get_semantic_codebook()
     wp = whitening_from_codebook(codebook, ridge=cfg["transform"]["ridge"])
-    families = cfg["channels"]["synchronous"]
+    families = families or cfg["channels"]["synchronous"]
     ref = "/content/clone.wav"
     if not os.path.exists(ref):
         import urllib.request
@@ -81,25 +81,29 @@ def run(adapter, config="configs/e1.yaml", max_texts=None):
     per_text_seed_clean = {}     # (text_id, seed) -> z_clean [Ti, d]
     deltaD = {f: [] for f in families if f != "clean"}
     rng = np.random.default_rng(0)
+    import torch
+    total = len(prompts) * len(seeds); count = 0; kept = 0
+    print(f"E1: generating {total} realizations x {len(families)} channels (b_context={b_ctx})")
     for p in prompts:
         for s in seeds:
-            import torch; torch.manual_seed(s)
-            tr = adapter.generate_trace(text=p["text"], seed=s, sample_id=f"{p['id']}_s{s}",
-                                        voice_id="repo_default", voice_clone_prompt=vp)
-            wav = np.asarray(tr.waveform, np.float32)
+            torch.manual_seed(s)
+            wavs, _ = adapter.model.generate_voice_clone(text=p["text"], language="English",
+                                                         voice_clone_prompt=vp)
+            wav = np.asarray(wavs[0], np.float32)
             z_clean = whitened(wav)
+            count += 1
             lo, hi = b_ctx, len(z_clean) - b_ctx
-            if hi - lo < 8:
-                continue
-            per_text_seed_clean[(p["id"], s)] = z_clean[lo:hi]
-            for f in families:
-                if f == "clean":
-                    continue
-                wav_c = apply_synchronous(f, wav, sr, rng)
-                z_c = whitened(wav_c)
-                m = min(len(z_clean), len(z_c))
-                d = (z_clean[:m] - z_c[:m])[lo:hi]
-                deltaD[f].append(d)
+            if hi - lo >= 8:
+                kept += 1
+                per_text_seed_clean[(p["id"], s)] = z_clean[lo:hi]
+                for fam in families:
+                    if fam == "clean":
+                        continue
+                    z_c = whitened(apply_synchronous(fam, wav, sr, rng))
+                    mfr = min(len(z_clean), len(z_c))
+                    deltaD[fam].append((z_clean[:mfr] - z_c[:mfr])[lo:hi])
+            if progress and count % progress == 0:
+                print(f"  {count}/{total} generated ({kept} with usable interior)")
 
     # ---- Sigma_D^(c) (pooled difference second-moment — correct for Sigma_D) ----
     SigmaD = {f: cov_from_diffs(np.concatenate(v)) for f, v in deltaD.items() if v}
