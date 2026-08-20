@@ -24,7 +24,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src import io  # noqa: E402
 from src.transforms import whitening_from_codebook, transform_shared_space  # noqa: E402
 from src.prewm.splits import text_splits  # noqa: E402
-from src.prewm.channels import apply_synchronous  # noqa: E402
+from src.prewm.channels import apply_synchronous, codec_roundtrip, CODEC_FAMILIES  # noqa: E402
+from src.alignment import crosscorr_peak_lag, norm_sequence  # noqa: E402
 from src.prewm import spectrum as sp  # noqa: E402
 from src.prewm.covariance import pooled_covariance  # noqa: F401  (kept out of the C path)
 from src.prewm.bootstrap import bootstrap_text_indices  # noqa: E402
@@ -99,11 +100,25 @@ def run(adapter, config="configs/e1.yaml", max_texts=None, n_seeds=None, familie
                 for fam in families:
                     if fam == "clean":
                         continue
-                    z_c = whitened(apply_synchronous(fam, wav, sr, rng))
-                    mfr = min(len(z_clean), len(z_c))
-                    deltaD[fam].append((z_clean[:mfr] - z_c[:mfr])[lo:hi])
+                    wav_c = (codec_roundtrip(fam, wav, sr) if fam in CODEC_FAMILIES
+                             else apply_synchronous(fam, wav, sr, rng))
+                    z_c = whitened(wav_c)
+                    # codecs add a fixed encoder delay -> offset-align latents before differencing
+                    off = crosscorr_peak_lag(norm_sequence(z_clean), norm_sequence(z_c), max_lag=6)
+                    a, b = (z_clean, z_c[off:]) if off >= 0 else (z_clean[-off:], z_c)
+                    mfr = min(len(a), len(b)); lo2, hi2 = b_ctx, mfr - b_ctx
+                    if hi2 - lo2 >= 8:
+                        deltaD[fam].append((a[:mfr] - b[:mfr])[lo2:hi2])
             if progress and count % progress == 0:
                 print(f"  {count}/{total} generated ({kept} with usable interior)")
+
+    # ---- cache whitened latents so re-analysis needs no regeneration ----
+    import pickle
+    os.makedirs(os.path.join(art, "cache"), exist_ok=True)
+    pickle.dump({"per_text_seed_clean": {f"{k[0]}|{k[1]}": v for k, v in per_text_seed_clean.items()},
+                 "deltaD": deltaD, "b_ctx": b_ctx, "families": families},
+                open(os.path.join(art, "cache", "latents.pkl"), "wb"))
+    print("cached latents ->", os.path.join(art, "cache", "latents.pkl"))
 
     # ---- Sigma_D^(c) (pooled difference second-moment — correct for Sigma_D) ----
     SigmaD = {f: cov_from_diffs(np.concatenate(v)) for f, v in deltaD.items() if v}
@@ -126,48 +141,86 @@ def run(adapter, config="configs/e1.yaml", max_texts=None, n_seeds=None, familie
     alignment_ok = (np.median(dur_spread) <= cfg["reperformance"]["max_duration_spread_frames"]) if dur_spread else False
     SigmaR = np.mean(scatters, axis=0) if scatters else None
 
-    # ---- regularized spectra per family + text bootstrap ----
+    # ARTIFACT CONTROL: recompute Sigma_R using only near-matched-duration realizations (spread<=1),
+    # so naive-prefix misalignment cannot inflate it. If the tail vanishes here, it was misalignment.
+    scatters_md = []
+    for tid, zs in by_text.items():
+        lens = [len(z) for z in zs]
+        Lmed = int(np.median(lens))
+        matched = [z for z in zs if abs(len(z) - Lmed) <= 1]
+        if len(matched) < 2:
+            continue
+        Lm = min(len(z) for z in matched)
+        st = np.stack([z[:Lm] for z in matched]); dv = (st - st.mean(0, keepdims=True)).reshape(-1, st.shape[-1])
+        scatters_md.append(cov_from_diffs(dv))
+    SigmaR_md = np.mean(scatters_md, axis=0) if scatters_md else None
+
+    # ---- regularized spectra + TWO-OBJECTIVE PLANE (exposes tiny-denominator ratios) ----
+    def two_objective(Sd, Sr, eps, r=8):
+        M = sp.regularized_M(Sd, Sr, eps=eps); V = sp.top_eigvecs(M, r)
+        # report v^T Sigma_D v and v^T Sigma_R v for top-r M-eigenvectors (in ORIGINAL space)
+        Bi = sp.inv_sqrt_psd(Sd + eps*np.eye(Sd.shape[0])); W = Bi @ V   # back to original coords
+        W /= np.linalg.norm(W, axis=0, keepdims=True) + 1e-12
+        vd = np.array([w @ Sd @ w for w in W.T]); vr = np.array([w @ Sr @ w for w in W.T])
+        return vd.tolist(), vr.tolist()
+
+    eps_mid = cfg["spectrum"]["eps_grid"][2]
     results = {}
     for f, Sd in SigmaD.items():
         if SigmaR is None:
             continue
         per_eps = {}
         for eps in cfg["spectrum"]["eps_grid"]:
-            M = sp.regularized_M(Sd, SigmaR, eps=eps)
-            w = sp.spectrum(M)
+            w = sp.spectrum(sp.regularized_M(Sd, SigmaR, eps=eps))
             per_eps[str(eps)] = {"top32": w[:32].tolist(), "n_above_1": int((w > 1).sum())}
-        M_sh = sp.regularized_M(Sd, SigmaR, eps=cfg["spectrum"]["eps_grid"][2], shrinkage=True,
-                                n_texts=len(by_text))
-        results[f] = {
-            "eps_sweep": per_eps,
-            "shrinkage_top32": sp.spectrum(M_sh)[:32].tolist(),
-            "eff_rank_Sd": sp.effective_rank(Sd), "eff_rank_Sr": sp.effective_rank(SigmaR),
-            "cond_B": sp.condition_number(Sd, eps=cfg["spectrum"]["eps_grid"][2]),
-        }
+        vd, vr = two_objective(Sd, SigmaR, eps_mid)
+        md = {}
+        if SigmaR_md is not None:
+            w_md = sp.spectrum(sp.regularized_M(Sd, SigmaR_md, eps=eps_mid))
+            md = {"matched_dur_top6": w_md[:6].tolist(), "matched_dur_n_above_1": int((w_md > 1).sum())}
+        results[f] = {"eps_sweep": per_eps,
+                      "two_objective_top8": {"Sigma_D": vd, "Sigma_R": vr},
+                      "matched_duration": md,
+                      "eff_rank_Sd": sp.effective_rank(Sd), "eff_rank_Sr": sp.effective_rank(SigmaR),
+                      "cond_B": sp.condition_number(Sd, eps=eps_mid),
+                      "mean_trace_Sd": float(np.trace(Sd)/Sd.shape[0]),
+                      "mean_trace_Sr": float(np.trace(SigmaR)/SigmaR.shape[0])}
         json.dump(results[f], open(os.path.join(art, "spectra", f"spectrum_{f}.json"), "w"), indent=2)
 
-    # ---- gate (spec §9): stable tail > 1 across realistic families, bootstrap-robust ----
-    fams_with_tail = [f for f, r in results.items()
-                      if r["eps_sweep"][str(cfg["spectrum"]["eps_grid"][2])]["n_above_1"] > 0
-                      and f not in ("clean",)]
-    realistic = [f for f in fams_with_tail if f not in ("resample_8k",)]  # crude "realistic" set
+    dim = codebook.shape[1]
+    # ---- honest gate: a real tail is LOW-RANK and not a tiny-denominator/alignment artifact ----
+    def family_verdict(r):
+        mid = r["eps_sweep"][str(eps_mid)]
+        top = mid["top32"][0]; nabove = mid["n_above_1"]
+        tiny_denom = r["mean_trace_Sd"] < 0.05 * r["mean_trace_Sr"]      # Sigma_D negligible vs Sigma_R
+        pervasive = nabove > 0.5 * dim                                    # not low-rank
+        md = r.get("matched_duration", {})
+        collapses = bool(md) and md.get("matched_dur_n_above_1", nabove) < 0.3 * nabove
+        return {"top": top, "n_above_1": nabove, "tiny_denominator": tiny_denom,
+                "pervasive_not_lowrank": pervasive, "tail_collapses_when_aligned": collapses,
+                "credible_lowrank_tail": bool(not tiny_denom and not pervasive and not collapses and top > 1.5)}
+    verdicts = {f: family_verdict(r) for f, r in results.items() if f != "clean"}
+    credible = [f for f, v in verdicts.items() if v["credible_lowrank_tail"]]
     if not alignment_ok:
-        gate, why = "STOP", "re-performance alignment unreliable (duration spread too large); MFA required"
-    elif not fams_with_tail:
-        gate, why = "STOP", "no derivative family shows a tail above 1"
-    elif len(realistic) >= 2:
-        gate, why = "PROCEED", "multiple realistic families show a tail above 1 (verify bootstrap on GPU)"
+        gate, why = "STOP", f"naive-prefix alignment unreliable (median duration spread {np.median(dur_spread):.0f}); MFA required"
+    elif any(v["tiny_denominator"] or v["pervasive_not_lowrank"] for v in verdicts.values()):
+        gate, why = "INVESTIGATE", ("eigen-tail is a tiny-Sigma_D / alignment artifact (pervasive, huge "
+                                    "ratios) — DSP channels too weak and/or Sigma_R inflated by misalignment. "
+                                    "Need realistic codec channels (MP3/Opus) + matched/MFA alignment.")
+    elif len(credible) >= 2:
+        gate, why = "PROCEED", "multiple realistic families show a credible LOW-RANK tail (verify bootstrap/held-out)"
     else:
-        gate, why = "INVESTIGATE", "tail exists only for clean/mild families; realistic codecs pending (need ffmpeg)"
+        gate, why = "INVESTIGATE", "no credible low-rank tail yet"
 
     metrics = {"n_texts": len(by_text), "families": list(results), "b_context": b_ctx,
+               "verdicts": verdicts,
                "alignment_ok": bool(alignment_ok), "median_duration_spread": float(np.median(dur_spread)) if dur_spread else None,
-               "families_with_tail": fams_with_tail, "gate": gate, "why": why,
+               "credible_lowrank_families": credible, "gate": gate, "why": why,
                "note": "codec (MP3/Opus) families need ffmpeg on host; add to complete the realistic set."}
     io.write_json(os.path.join(art, "metrics", "e1_metrics.json") if os.path.isdir(os.path.join(art, "metrics"))
                   else _mkdir_json(art), metrics)
     _report(art, metrics, results)
-    print(f"E1 done. gate={gate} ({why}). families_with_tail={fams_with_tail}")
+    print(f"E1 done. gate={gate} | credible_lowrank={credible} | why={why}")
     return metrics
 
 

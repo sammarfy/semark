@@ -60,6 +60,29 @@ def one_pole_highpass(x: np.ndarray, alpha: float = 0.9) -> np.ndarray:
     return y.astype(np.float32)
 
 
+CODEC_FAMILIES = ("mp3_128", "mp3_64", "opus_64", "opus_32")
+_CODEC_SPEC = {"mp3_128": ("mp3", "128k", "libmp3lame"), "mp3_64": ("mp3", "64k", "libmp3lame"),
+               "opus_64": ("ogg", "64k", "libopus"), "opus_32": ("ogg", "32k", "libopus")}
+
+
+def codec_roundtrip(family: str, wav: np.ndarray, sr: int) -> np.ndarray:
+    """Real lossy-codec round trip via ffmpeg (host). Introduces a FIXED encoder delay, so the
+    caller must offset-align the re-encoded latents before differencing (not frame-synchronous)."""
+    import os
+    import subprocess
+    import tempfile
+    import soundfile as sf
+    ext, br, codec = _CODEC_SPEC[family]
+    with tempfile.TemporaryDirectory() as d:
+        inp, comp, outp = (os.path.join(d, f) for f in ("in.wav", f"c.{ext}", "out.wav"))
+        sf.write(inp, np.asarray(wav, np.float32).ravel(), sr)
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", inp, "-c:a", codec, "-b:a", br, comp],
+                       check=False)
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", comp, "-ar", str(sr), outp], check=False)
+        w, _ = sf.read(outp)
+    return np.asarray(w, np.float32).ravel()
+
+
 def apply_synchronous(family: str, wav: np.ndarray, sr: int, rng: np.random.Generator) -> np.ndarray:
     """Apply a named synchronous derivative family to a waveform. Returns same-length audio."""
     if family == "clean":
